@@ -10,6 +10,7 @@ from completor import Completor, get_encoding
 from completor.compat import to_bytes
 
 import platform
+import os
 
 ACTION_MAP = {
     b'complete': 'complete',
@@ -37,8 +38,12 @@ class Racer(Completor):
     def prepare_request(self, action):
         line, col = self.cursor
         is_cygwin = platform.system().find("CYGWIN") != -1
-        filename = "D:/cygwin" + self.filename if is_cygwin else quote(self.filename)
-        tempname = "D:/cygwin" + self.tempname if is_cygwin else quote(self.tempname)
+        cmd = 'cygpath -a -w {}'.format(self.filename)
+        cyg_filename = os.popen(cmd).read().strip().replace('\\', '\\\\')
+        cmd = 'cygpath -a -w {}'.format(self.tempname)
+        cyg_tempname = os.popen(cmd).read().strip().replace('\\', '\\\\')
+        filename = cyg_filename if is_cygwin else quote(self.filename)
+        tempname = cyg_tempname if is_cygwin else quote(self.tempname)
         return ' '.join([ACTION_MAP[action], str(line), str(col),filename, tempname])
 
     def is_message_end(self, msg):
