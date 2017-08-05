@@ -9,6 +9,8 @@ except ImportError:
 from completor import Completor, get_encoding
 from completor.compat import to_bytes
 
+import platform
+
 ACTION_MAP = {
     b'complete': 'complete',
     b'definition': 'find-definition'
@@ -34,8 +36,10 @@ class Racer(Completor):
 
     def prepare_request(self, action):
         line, col = self.cursor
-        return ' '.join([ACTION_MAP[action], str(line), str(col),
-                         quote(self.filename), quote(self.tempname)])
+        is_cygwin = platform.system().find("CYGWIN") != -1
+        filename = "D:/cygwin" + self.filename if is_cygwin else quote(self.filename)
+        tempname = "D:/cygwin" + self.tempname if is_cygwin else quote(self.tempname)
+        return ' '.join([ACTION_MAP[action], str(line), str(col),filename, tempname])
 
     def is_message_end(self, msg):
         return msg == b'END'
